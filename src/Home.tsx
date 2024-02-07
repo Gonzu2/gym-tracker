@@ -478,10 +478,10 @@ function Home() {
                   <h1 className="cursor-pointer">
                     {templateExcersises[chosenDay].day} workout
                   </h1>
-                  <h1>Excersises completed - {completedCount}</h1>
+                  <h1>Excersises completed {completedCount}</h1>
                 </div>
                 {templateExcersises[chosenDay].excersises.map(
-                  (workout, index) => (
+                  (workout: any, index: number) => (
                     <li
                       key={index}
                       className={`w-[100%] h-auto max-h-[525px] border-2 border-[#2c2a2a] rounded-md flex flex-col justify-start items-start gap-[10px] ${
@@ -544,7 +544,9 @@ function Home() {
                                 <ul className="flex flex-col justify-start items-start gap-[5px] width-[100%] p-4">
                                   {[...Array(workout.sets)].map((_, index) => (
                                     <li className="w-[100%]" key={index}>
-                                      <p>Set number {index + 1}</p>
+                                      <p className="text-white">
+                                        Set number {index + 1}
+                                      </p>
                                       <Input
                                         type="number"
                                         min={0}
@@ -562,7 +564,7 @@ function Home() {
                                     id={`terms${index}`}
                                   />
                                   <label
-                                    htmlFor="completed"
+                                    htmlFor={`terms${index}`}
                                     className="text-white"
                                   >
                                     Excersise completed

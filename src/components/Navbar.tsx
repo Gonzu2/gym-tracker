@@ -39,7 +39,7 @@ import { useNavigate } from "react-router-dom";
 function Navbar() {
   const navigateTo = useNavigate();
 
-  const [loggedIn] = React.useState(true);
+  const [loggedIn] = React.useState(false);
   const [userName] = React.useState("Gonzu");
 
   return (

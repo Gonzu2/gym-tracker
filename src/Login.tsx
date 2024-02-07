@@ -1,5 +1,7 @@
 // import * as React from "react";
 
+import axios from "axios";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import * as z from "zod";
+import { ChangeEvent, useState } from "react";
 
 const formSchema = z.object({
   username: z
@@ -37,6 +40,8 @@ const formSchema = z.object({
 });
 
 function Login() {
+  const [formError, setFormError] = useState("hidden");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,10 +50,24 @@ function Login() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const formData = new FormData();
+      formData.append("username", values.username);
+      formData.append("password", values.password);
+
+      // Assuming your API endpoint is "/api/register"
+      const response = await axios.post(
+        "http://localhost:4000/user/login",
+        formData
+      );
+
+      if (response.status === 202) {
+        setFormError("Invalid password");
+      }
+    } catch (error) {
+      setFormError("Error submitting the registration form");
+    }
   }
 
   return (
@@ -94,7 +113,7 @@ function Login() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-[50%] text-white z-100"
+            className="space-y-8 w-[50%] text-white z-100 bg-[#191919] bg-opacity-60 p-[25px] rounded-[10px]"
           >
             <FormField
               control={form.control}
@@ -103,7 +122,11 @@ function Login() {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input
+                      autoComplete="username-gym-tracker"
+                      placeholder="Username"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     This is your public display name.
@@ -119,7 +142,12 @@ function Login() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <Input
+                      autoComplete="password-gym-tracker"
+                      type="password"
+                      placeholder="******"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     This is your private password.
@@ -128,6 +156,13 @@ function Login() {
                 </FormItem>
               )}
             />
+            <div>
+              {formError !== "hidden" ? (
+                <p className="text-red-500">{formError}</p>
+              ) : (
+                <></>
+              )}
+            </div>
             <Button type="submit">Login</Button>
           </form>
         </Form>
