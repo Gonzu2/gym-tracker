@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // React and others
 import * as z from "zod";
 import { ChangeEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z
   .object({
@@ -78,6 +79,8 @@ function getImageData(event: ChangeEvent<HTMLInputElement>) {
 import plusIcon from "./assets/plusIcon.png";
 
 function Register() {
+  const navigateTo = useNavigate();
+
   const [preview, setPreview] = useState(plusIcon);
   const [mainPicture, setPicture] = useState();
   const [formError, setFormError] = useState("hidden");
@@ -106,12 +109,14 @@ function Register() {
 
       // Assuming your API endpoint is "/api/register"
       const response = await axios.post(
-        "http://localhost:4000/user/createAccount",
+        "https://fresh-malleable-verdict.glitch.me/user/createAccount",
         formData
       );
 
       if (response.status === 202) {
         setFormError("Username is already taken");
+      } else if (response.status === 200) {
+        navigateTo("/");
       }
     } catch (error) {
       setFormError("Error submitting the registration form");
