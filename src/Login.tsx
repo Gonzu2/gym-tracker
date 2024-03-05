@@ -1,5 +1,6 @@
 // import * as React from "react";
 
+import Cookies from "js-cookie";
 import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ import { Input } from "@/components/ui/input";
 
 import * as z from "zod";
 import { ChangeEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   username: z
@@ -39,8 +41,13 @@ const formSchema = z.object({
     }),
 });
 
+import { useAuth } from "./utils/context/authContext";
+
 function Login() {
+  const { handleLogin } = useAuth();
+  const navigateTo = useNavigate();
   const [formError, setFormError] = useState("hidden");
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,21 +59,36 @@ function Login() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const formData = new FormData();
+      const formData = new URLSearchParams();
       formData.append("username", values.username);
       formData.append("password", values.password);
 
-      // Assuming your API endpoint is "/api/register"
+      setLoading(true);
       const response = await axios.post(
-        "https://fresh-malleable-verdict.glitch.me/user/login",
-        formData
+        "http://localhost:4001/user/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
       );
 
-      if (response.status === 202) {
-        setFormError("Invalid password");
+      setLoading(false);
+
+      if (response.status === 200) {
+        Cookies.remove("token");
+        Cookies.set("token", response.data.user.token);
+        handleLogin(response.data.user);
       }
     } catch (error) {
-      setFormError("Error submitting the registration form");
+      if (error.response.status === 401) {
+        setFormError("Invalid username or password");
+      } else {
+        setFormError(`Unexpected response: ${error.response.status}`);
+      }
+
+      setLoading(false);
     }
   }
 
@@ -108,8 +130,15 @@ function Login() {
       </svg>
       <div
         style={{ height: "calc(100dvh - 150px)" }}
-        className="grid place-items-center z-100"
+        className="grid place-items-center z-100 relative"
       >
+        <div
+          className={` ${
+            loading ? "flex" : "hidden"
+          } absolute w-[100%] h-[100%] z-10 bg-black bg-opacity-60 items-center justify-center`}
+        >
+          <div className="w-[120px] h-[120px] rounded-[50%] border-t-[16px] border-t-transparent border-[16px] animate-spin"></div>
+        </div>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

@@ -1,4 +1,5 @@
 import * as React from "react";
+import Cookies from "js-cookie";
 
 import {
   Accordion,
@@ -48,6 +49,7 @@ import "./css/home.css";
 //Importing images
 import benchpress1 from "./assets/benchpress1.png";
 import { Button } from "./components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   let templateExcersises = {

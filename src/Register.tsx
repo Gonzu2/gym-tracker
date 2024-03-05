@@ -1,4 +1,5 @@
 // import * as React from "react";
+import Cookies from "js-cookie";
 
 import axios from "axios";
 
@@ -23,6 +24,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import * as z from "zod";
 import { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import plusIcon from "./assets/plusIcon.png";
 
 const formSchema = z
   .object({
@@ -76,14 +79,15 @@ function getImageData(event: ChangeEvent<HTMLInputElement>) {
   return { files, displayUrl };
 }
 
-import plusIcon from "./assets/plusIcon.png";
+import { useAuth } from "./utils/context/authContext";
 
 function Register() {
+  const { handleRegister } = useAuth();
   const navigateTo = useNavigate();
 
-  const [preview, setPreview] = useState(plusIcon);
-  const [mainPicture, setPicture] = useState();
   const [formError, setFormError] = useState("hidden");
+
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -91,7 +95,6 @@ function Register() {
       username: "",
       password: "",
       confirmPassword: "",
-      profilePicture: preview,
     },
   });
 
@@ -102,23 +105,42 @@ function Register() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const formData = new FormData();
+      const formData = new URLSearchParams();
       formData.append("username", values.username);
       formData.append("password", values.password);
-      formData.append("profilePicture", mainPicture[0]);
+      // formData.append("profilePicture", mainPicture[0]);
 
       // Assuming your API endpoint is "/api/register"
+
+      setLoading(true);
+
+      // const response = await axios.post(
+      //   "https://fresh-malleable-verdict.glitch.me/user/createAccount",
+      //   formData
+      // );
+
       const response = await axios.post(
-        "https://fresh-malleable-verdict.glitch.me/user/createAccount",
-        formData
+        "http://localhost:4001/user/createAccount",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
       );
 
+      setLoading(false);
+
       if (response.status === 202) {
-        setFormError("Username is already taken");
+        return setFormError("Username is already taken");
       } else if (response.status === 200) {
-        navigateTo("/");
+        Cookies.remove("token");
+        Cookies.set("token", response.data.user.token);
+        handleRegister(response.data.user);
       }
     } catch (error) {
+      console.log(error);
+      setLoading(false);
       setFormError("Error submitting the registration form");
     }
   };
@@ -161,42 +183,21 @@ function Register() {
       </svg>
       <div
         style={{ height: "calc(100dvh - 150px)" }}
-        className="grid place-items-center z-100"
+        className="grid place-items-center z-100 relative"
       >
+        <div
+          className={` ${
+            loading ? "flex" : "hidden"
+          } absolute w-[100%] h-[100%] z-10 bg-black bg-opacity-60 items-center justify-center`}
+        >
+          <div className="w-[120px] h-[120px] rounded-[50%] border-t-[16px] border-t-transparent border-[16px] animate-spin"></div>
+        </div>
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-[50%] text-white z-100 bg-[#191919] bg-opacity-80 p-[25px] rounded-[10px]"
+            className="space-y-8 w-[50%] text-white z-100 bg-[#191919] bg-opacity-90 p-[25px] rounded-[10px] relative"
           >
-            <FormField
-              control={form.control}
-              name="profilePicture"
-              render={({ field: { onChange, value, ...rest } }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Avatar className="w-24 h-24">
-                      <AvatarImage src={preview} />
-                      <AvatarFallback>PC</AvatarFallback>
-                    </Avatar>
-                  </FormLabel>
-
-                  <FormControl>
-                    <Input
-                      className=" file:text-slate-400"
-                      type="file"
-                      {...rest}
-                      onChange={(event) => {
-                        const { files, displayUrl } = getImageData(event);
-                        setPreview(displayUrl);
-                        setPicture(files);
-                        onChange(files);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>Upload your profile picture</FormDescription>
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="username"
@@ -247,6 +248,7 @@ function Register() {
                     <Input
                       type="password"
                       placeholder="Confirm password"
+                      autoComplete="false"
                       {...field}
                     />
                   </FormControl>

@@ -35,17 +35,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import "./css/navbar.css";
 
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../utils/context/authContext";
 
 function Navbar() {
+  const { user, handleLogout } = useAuth();
   const navigateTo = useNavigate();
+  const [currentUser, setCurrentUser] = React.useState({});
 
-  const [loggedIn] = React.useState(false);
-  const [userName] = React.useState("Gonzu");
+  React.useEffect(() => {
+    if (user !== null) {
+      setCurrentUser(user);
+      setLoggedIn(true);
+      setUserName(user.name);
+    } else {
+      setCurrentUser(0);
+      setLoggedIn(false);
+      setUserName("");
+      navigateTo("/");
+    }
+  }, [user]);
+
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [userName, setUserName] = React.useState("");
 
   return (
-    <NavigationMenu
-      className=" w-[100%] max-w-[100dvw] justify-start bg-[#19191] border-b-[1px] border-b-[#2b2a2a] box-border relative overflow-hidden"
-    >
+    <NavigationMenu className=" w-[100%] max-w-[100dvw] justify-start bg-[#19191] border-b-[1px] border-b-[#2b2a2a] box-border relative overflow-hidden">
       <ul className="flex items-center justify-between w-[100%] box-border relative">
         <li className="navbar-brand">
           <a href="/">Gym Tracker</a>
@@ -104,9 +118,7 @@ function Navbar() {
                               Cancel
                             </AlertDialogCancel>
                             <SheetClose asChild>
-                              <AlertDialogAction
-                                onClick={() => navigateTo("/login")}
-                              >
+                              <AlertDialogAction onClick={handleLogout}>
                                 Log out
                               </AlertDialogAction>
                             </SheetClose>
