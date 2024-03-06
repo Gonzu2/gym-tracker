@@ -1,4 +1,4 @@
-// import * as React from "react";
+import * as React from "react";
 
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -19,8 +19,6 @@ import {
 import { Input } from "@/components/ui/input";
 
 import * as z from "zod";
-import { ChangeEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   username: z
@@ -45,9 +43,8 @@ import { useAuth } from "./utils/context/authContext";
 
 function Login() {
   const { handleLogin } = useAuth();
-  const navigateTo = useNavigate();
-  const [formError, setFormError] = useState("hidden");
-  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = React.useState("hidden");
+  const [loading, setLoading] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

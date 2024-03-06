@@ -40,15 +40,12 @@ import { useAuth } from "../utils/context/authContext";
 function Navbar() {
   const { user, handleLogout } = useAuth();
   const navigateTo = useNavigate();
-  const [currentUser, setCurrentUser] = React.useState({});
 
   React.useEffect(() => {
     if (user !== null) {
-      setCurrentUser(user);
       setLoggedIn(true);
       setUserName(user.name);
     } else {
-      setCurrentUser(0);
       setLoggedIn(false);
       setUserName("");
       navigateTo("/");

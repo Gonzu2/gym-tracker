@@ -1,4 +1,4 @@
-// import * as React from "react";
+import * as React from "react";
 import Cookies from "js-cookie";
 
 import axios from "axios";
@@ -17,15 +17,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 //
 
 // React and others
 import * as z from "zod";
-import { ChangeEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import plusIcon from "./assets/plusIcon.png";
 
 const formSchema = z
   .object({
@@ -64,30 +59,15 @@ const formSchema = z
     }
   );
 
-function getImageData(event: ChangeEvent<HTMLInputElement>) {
-  // FileList is immutable, so we need to create a new one
-  const dataTransfer = new DataTransfer();
-
-  // Add newly uploaded images
-  Array.from(event.target.files!).forEach((image) =>
-    dataTransfer.items.add(image)
-  );
-
-  const files = dataTransfer.files;
-  const displayUrl = URL.createObjectURL(event.target.files![0]);
-
-  return { files, displayUrl };
-}
 
 import { useAuth } from "./utils/context/authContext";
 
 function Register() {
   const { handleRegister } = useAuth();
-  const navigateTo = useNavigate();
 
-  const [formError, setFormError] = useState("hidden");
+  const [formError, setFormError] = React.useState("hidden");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,11 +77,6 @@ function Register() {
       confirmPassword: "",
     },
   });
-
-  const {
-    setError,
-    formState: { errors },
-  } = useForm();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
