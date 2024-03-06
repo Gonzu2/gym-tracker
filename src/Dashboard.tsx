@@ -226,8 +226,6 @@ function Dashboard() {
 
   type DayIndex = keyof typeof templateExcersises;
 
-  const [chosenCategory, setChosenCategory] = React.useState("workout-tracker");
-
   const [chosenDay, setChosenDay] = React.useState<DayIndex>(
     ((new Date().getDay() + 6) % 7) as DayIndex
   );
